@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "989896963547",
+    "project_id": "autotrackingapp",
+    "storage_bucket": "autotrackingapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:989896963547:android:ab4954dfe1820b0c0f23fe",
+        "android_client_info": {
+          "package_name": "com.autotrackingapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGuo5OjgFgH2mvh__QRx2juCamY_pKKDE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

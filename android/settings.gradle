@@ -1,0 +1,12 @@
+pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
+plugins { id("com.facebook.react.settings") }
+extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+rootProject.name = 'AutoTrackingApp'
+include ':app'
+includeBuild('../node_modules/@react-native/gradle-plugin')
+include ':react-native-push-notification'
+project(':react-native-push-notification').projectDir = file('../node_modules/react-native-push-notification/android')
+include ':react-native-background-geolocation'
+project(':react-native-background-geolocation').projectDir = file('../node_modules/react-native-background-geolocation/android')
+include ':react-native-background-fetch'
+project(':react-native-background-fetch').projectDir = file('../node_modules/react-native-background-fetch/android')

@@ -1,0 +1,96 @@
+buildscript {
+    ext {
+        buildToolsVersion = "34.0.0"
+        minSdkVersion = 23
+        compileSdkVersion = 34
+        targetSdkVersion = 34
+        ndkVersion = "26.1.10909125"
+        kotlinVersion = "1.9.24"
+        googlePlayServicesVersion = "17.0.0"
+        appCompatVersion 	= "1.4.2"     
+        googlePlayServicesLocationVersion = "21.0.1"  
+        supportLibVersion="23.1.1"
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath('com.android.tools.build:gradle:8.5.2')
+        classpath("com.facebook.react:react-native-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        classpath('com.google.gms:google-services:4.3.10')
+
+
+    }
+    allprojects {  
+    repositories {
+      maven { url("${project(':react-native-background-geolocation').projectDir}/libs") }
+      maven { url 'https://developer.huawei.com/repo/' }
+      // Required for react-native-background-fetch
+      maven { url("${project(':react-native-background-fetch').projectDir}/libs") }
+       maven {
+          // react-native-background-fetch
+          url("${project(':react-native-background-fetch').projectDir}/libs")
+      }
+}
+subprojects {
+    afterEvaluate { project ->
+      if (project.hasProperty('android')) {
+        project.android {
+          if (namespace == null || namespace.isEmpty()) {
+            def defaultNamespace = project.group.toString().replace('.', '_')
+            namespace = defaultNamespace
+          }
+
+          buildFeatures {
+            buildConfig = true
+          }
+        }
+
+        // Task to ensure namespace and remove package attribute
+        project.tasks.register("fixManifestsAndNamespace") {
+          doLast {
+            // Ensure namespace in build.gradle
+            def buildGradleFile = file("${project.projectDir}/build.gradle")
+            if (buildGradleFile.exists()) {
+              def buildGradleContent = buildGradleFile.getText('UTF-8')
+              def manifestFile = file("${project.projectDir}/src/main/AndroidManifest.xml")
+              if (manifestFile.exists()) {
+                def manifestContent = manifestFile.getText('UTF-8')
+                def packageName = manifestContent.find(/package="([^"]+)"/) { match, p -> p }
+                if (packageName && !buildGradleContent.contains("namespace")) {
+                  println "Setting namespace in ${buildGradleFile}"
+                  buildGradleContent = buildGradleContent.replaceFirst(
+                    /android\s*\{/, "android {\n    namespace '${packageName}'"
+                  )
+                  buildGradleFile.write(buildGradleContent, 'UTF-8')
+                }
+              }
+            }
+
+            // Remove package attribute from AndroidManifest.xml
+            def manifests = fileTree(dir: project.projectDir, includes: ['**/AndroidManifest.xml'])
+            manifests.each { File manifestFile ->
+              def manifestContent = manifestFile.getText('UTF-8')
+              if (manifestContent.contains('package=')) {
+                println "Removing package attribute from ${manifestFile}"
+                manifestContent = manifestContent.replaceAll(/package="[^"]*"/, '')
+                manifestFile.write(manifestContent, 'UTF-8')
+              }
+            }
+          }
+        }
+
+        // Ensure the task runs before the build process
+        project.tasks.matching { it.name.startsWith("preBuild") }.all {
+          dependsOn project.tasks.named("fixManifestsAndNamespace")
+        }
+      }
+    }
+  }
+}
+
+}
+
+apply plugin: "com.facebook.react.rootproject"
